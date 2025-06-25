@@ -1,4 +1,4 @@
-import { shallowReactive, shallowReadonly } from "vue"
+import { reactive, readonly, shallowReadonly } from "vue"
 import { randoms } from "../util/random-number"
 import { defaultRendererOptions, GameRenderer, type GameRendererOption } from "./game-renderer"
 import type { MineInfo } from "./game-mine"
@@ -10,26 +10,29 @@ export type GameStatus = 'init' | 'busy' | 'idle' | 'end'
 
 
 export class GameMain {
-    readonly column: number
     /** 地雷列表 */
     private mines: MineInfo[]
     /** 游戏渲染器 */
     private renderer: GameRenderer
     /** 游戏玩家列表 */
-    private gamePlayers = new GamePlayers()
+    readonly players = new GamePlayers()
     /** 倒霉数字 */
     private badNumber: number
 
 
-    private state = shallowReactive({
+    private state = reactive({
         /** 游戏的状态 */
         gameStatus: 'init' as GameStatus,
         /** 未爆炸的地雷数量 */
-        totalUnexplodeMine: 0
+        unexplodeCount: 0,
+        /** 列数 */
+        column: 0,
+        /** 总数 */
+        total: 0,
+        /** 渲染器选项 */
+        rendererOption: readonly(defaultRendererOptions)
     })
 
-    /** 返回当前回合的玩家 */
-    getNowPlayer = this.gamePlayers.getNowPlayer.bind(this.gamePlayers)
 
     /**
      * 游戏主类
@@ -38,7 +41,9 @@ export class GameMain {
      * @param rendererOption 渲染器选项
      */
     constructor(column: number = 10, total: number = 100, rendererOption: GameRendererOption = defaultRendererOptions) {
-        this.column = column
+        this.state.column = column
+        this.state.total = total
+        this.state.rendererOption = readonly(rendererOption)
 
         this.mines = Array.from({ length: total }).map((_, n) => {
             return {
@@ -54,7 +59,7 @@ export class GameMain {
 
         this.badNumber = randoms.getOneInRange(total)
 
-        this.state.totalUnexplodeMine = total
+        this.state.unexplodeCount = total
     }
 
     /**
@@ -79,6 +84,15 @@ export class GameMain {
         this.newGame()
     }
 
+    /**
+     * 改变棋盘的参数
+     * @param column 
+     * @param total 
+     */
+    changeGameConfig(column: number, total: number, rendererOption: GameRendererOption = defaultRendererOptions) {
+
+    }
+
 
     /**
      * 新开一局游戏
@@ -89,7 +103,7 @@ export class GameMain {
         for (const m of this.mines) m.exploded = false
         this.renderer.resetAllMines()
 
-        this.state.totalUnexplodeMine = this.mines.length
+        this.state.unexplodeCount = this.mines.length
         this.badNumber = randoms.getOneInRange(this.mines.length)
 
         this.state.gameStatus = 'idle'
@@ -101,7 +115,7 @@ export class GameMain {
             console.log('此次点击无效：地雷ID无效', mineNum)
             return
         }
-        const player = this.gamePlayers.getNowPlayer()
+        const player = this.players.currentPlayer
         if (!player) {
             console.log('此次点击无效：当前无玩家', player)
             return
@@ -140,7 +154,7 @@ export class GameMain {
         await this.renderer.explodeMines(...selectMineIds)
         // 爆炸计数
         player.explodeCount += selectMineIds.length
-        this.state.totalUnexplodeMine -= selectMineIds.length
+        this.state.unexplodeCount -= selectMineIds.length
 
         if (end) {
             await this.renderer.explodeMines(...randoms.disorderedArray(this.mines.filter(m => !m.exploded).map(m => m.num)))
@@ -150,10 +164,10 @@ export class GameMain {
             this.state.gameStatus = 'end'
 
             // 游戏结束后统计
-            for (const p of this.gamePlayers.players) p.gameCount++
+            for (const p of this.players.players) p.tiggerCount++
             player.addBadNumber(this.badNumber)
         } else {
-            this.gamePlayers.nextPlayer()
+            this.players.nextPlayer()
             this.state.gameStatus = 'idle'
         }
     }

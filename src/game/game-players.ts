@@ -1,4 +1,4 @@
-import { shallowReactive, shallowReadonly, } from "vue"
+import { reactive, shallowReadonly, } from "vue"
 import { randoms } from "../util/random-number"
 
 /**
@@ -18,8 +18,8 @@ export class PlayerInfo {
     explodeCount: number = 0
     /** 倒霉数字的中奖记录 */
     badNumbers: Map<number, number> = new Map()
-    /** 完整体验过的游戏局数 */
-    gameCount: number = 0
+    /** 触发地雷次数（点击次数） */
+    tiggerCount: number = 0
 
     /** 玩家是否正在游玩 */
     isPlaying: boolean = false
@@ -40,13 +40,23 @@ export class PlayerInfo {
         return n
     }
 
+    /** 浅克隆玩家信息 */
+    shallowClone() {
+        const player = new PlayerInfo(this.name, this.pid)
+        player.explodeCount = this.explodeCount
+        player.badNumbers = this.badNumbers
+        player.tiggerCount = this.tiggerCount
+        player.isPlaying = this.isPlaying
+        return player
+    }
+
     toJson() {
         return {
             pid: this.pid,
             name: this.name,
             explodeCount: this.explodeCount,
             badNumbers: Array.from(this.badNumbers.entries()),
-            gameCount: this.gameCount,
+            gameCount: this.tiggerCount,
             isPlaying: this.isPlaying
         }
     }
@@ -75,7 +85,7 @@ export class PlayerInfo {
             // 创建实例
             const player = new PlayerInfo(data.name, data.pid)
             player.explodeCount = data.explodeCount
-            player.gameCount = data.gameCount
+            player.tiggerCount = data.gameCount
             player.isPlaying = data.isPlaying
 
             // 转换Map类型
@@ -100,44 +110,21 @@ export class PlayerInfo {
 
 
 
-
-
 export class GamePlayers {
-    private state = shallowReactive({
+    private state = reactive({
         players: new Array<PlayerInfo>(),
-        nowPlayer: null as (PlayerInfo | null)
+        currentPlayer: null as (PlayerInfo | null)
     })
 
+
+
     /**
-     * 切换游戏的玩家列表
+     * 在列表中搜索下一个正在游玩的玩家
      * @param players 
-     */
-    changePlayers(players: PlayerInfo[]) {
-        let st = new Set<string>()
-        this.state.players = players.filter(p => {
-            if (st.has(p.pid)) return
-            st.add(p.pid)
-            return true
-        })
-    }
-
-    /**
-     * 获取游戏的玩家列表
-     * @returns 
-     */
-    get players() {
-        return shallowReadonly(this.state.players)
-    }
-
-
-    /**
-     * 搜索下一个正在游玩的玩家
      * @param startPlayer 
      * @returns 
      */
-    private findNextPlayingPlayer(startPlayer: PlayerInfo | null = null): PlayerInfo | null {
-        let players = this.state.players
-
+    static findNextPlayingPlayer(players: PlayerInfo[], startPlayer: PlayerInfo | null = null): PlayerInfo | null {
         // 特殊处理
         if (players.length == 0) return null
         else if (players.length == 1) return players[0]
@@ -158,33 +145,68 @@ export class GamePlayers {
         return null
     }
 
+    private findNextPlayingPlayer(startPlayer: PlayerInfo | null = null): PlayerInfo | null {
+        return GamePlayers.findNextPlayingPlayer(this.state.players, startPlayer)
+    }
+
+
+    /**
+     * 切换游戏的玩家列表
+     * @param players 
+     */
+    changePlayers(players: PlayerInfo[]) {
+        let st = new Set<string>()
+        this.state.players = players.filter(p => {
+            if (st.has(p.pid)) return
+            st.add(p.pid)
+            return true
+        })
+        if (this.state.currentPlayer == null) this.state.currentPlayer = this.findNextPlayingPlayer()
+        else if (!this.state.currentPlayer.isPlaying) this.state.currentPlayer = this.findNextPlayingPlayer(this.state.currentPlayer)
+    }
+
+    changeCurrentPlayer(player: PlayerInfo | null) {
+        if (player != null) {
+            let p = this.state.players.find(p => p.pid == player.pid) ?? null
+            this.state.currentPlayer = p?.isPlaying ? p : null
+        } else {
+            this.state.currentPlayer = null
+        }
+    }
+
+    /**
+     * 获取游戏的玩家列表
+     * @returns 
+     */
+    get players() {
+        return shallowReadonly(this.state.players)
+    }
 
 
     /**
      * 当前选择的正在游戏中的玩家
      */
-    getNowPlayer() {
-        if (this.state.nowPlayer == null) this.state.nowPlayer = this.findNextPlayingPlayer()
-        else if (!this.state.nowPlayer.isPlaying) this.state.nowPlayer = this.findNextPlayingPlayer(this.state.nowPlayer)
-        return this.state.nowPlayer
+    get currentPlayer() {
+        return this.state.currentPlayer
     }
 
     /**
      * 选择下一个正在游戏中的玩家
      */
     nextPlayer() {
-        this.state.nowPlayer = this.findNextPlayingPlayer(this.getNowPlayer())
-        return this.state.nowPlayer
+        this.state.currentPlayer = this.findNextPlayingPlayer(this.currentPlayer)
+        return this.state.currentPlayer
     }
 
+
     /**
-   * 序列化为 JSON 可转换对象
-   * @returns 
-   */
+     * 序列化为 JSON 可转换对象
+     * @returns 
+     */
     toJson() {
         return {
             players: this.state.players.map(player => player.toJson()),
-            nowPlayerPid: this.state.nowPlayer?.pid || null
+            nowPlayerPid: this.state.currentPlayer?.pid || null
         }
     }
 
@@ -221,7 +243,7 @@ export class GamePlayers {
 
             // 设置当前玩家
             if (data.nowPlayerPid) {
-                gamePlayers.state.nowPlayer = players.find(p => p.pid === data.nowPlayerPid) || null
+                gamePlayers.state.currentPlayer = players.find(p => p.pid === data.nowPlayerPid) || null
             }
 
             return gamePlayers
