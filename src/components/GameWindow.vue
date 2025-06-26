@@ -4,14 +4,15 @@
         <el-divider class="game-info">
             <el-text line-clamp=1 size="large">
                 💣️x{{ refs.unexplodeCount }}
-                {{ refs.playerNamePrefix }}@{{ refs.playerName }}
                 🎮️#{{ refs.gameStatus }}
+                {{ refs.playerNamePrefix }}@{{ refs.playerName }}
             </el-text>
         </el-divider>
 
         <el-space class="game-tool">
             <GameRefreshButton :game="game" />
             <GameConfigButton :game="game" />
+            <GameScoreboardButton :game="game" />
         </el-space>
     </div>
 </template>
@@ -22,6 +23,7 @@ import { GameMain, } from '../game/game-main'
 import GameRefreshButton from './game-window-tool/GameRefreshButton.vue'
 import GameConfigButton from './game-window-tool/GameConfigButton.vue'
 import { setTestPlayers } from '../game/test-players'
+import GameScoreboardButton from './game-window-tool/GameScoreboardButton.vue'
 
 const gameBox = useTemplateRef('game-box')
 const game = new GameMain()

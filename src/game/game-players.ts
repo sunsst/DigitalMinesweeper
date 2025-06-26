@@ -18,8 +18,11 @@ export class PlayerInfo {
     explodeCount: number = 0
     /** 倒霉数字的中奖记录 */
     badNumbers: Map<number, number> = new Map()
-    /** 触发地雷次数（点击次数） */
-    tiggerCount: number = 0
+    /** 倒霉数字中奖计数 */
+    badNumberCount: number = 0
+
+    /** 玩家经过的回合次数 */
+    roundCount: number = 0
 
     /** 玩家是否正在游玩 */
     isPlaying: boolean = false
@@ -27,6 +30,20 @@ export class PlayerInfo {
     constructor(name: string, pid = makePlayerUid()) {
         this.name = name
         this.pid = pid
+    }
+
+
+    /**
+     * 将另一个玩家的参数累加到自己分数信息中
+     * @param player 
+     */
+    addInfo(player: PlayerInfo) {
+        this.explodeCount += player.explodeCount
+        this.roundCount += player.roundCount
+        this.badNumberCount += player.badNumberCount
+        for (const [k, v] of player.badNumbers) {
+            this.badNumbers.set(k, (this.badNumbers.get(k) ?? 0) + v)
+        }
     }
 
     /**
@@ -37,6 +54,7 @@ export class PlayerInfo {
     addBadNumber(num: number) {
         let n = (this.badNumbers.get(num) ?? 0) + 1
         this.badNumbers.set(num, n)
+        this.badNumberCount++
         return n
     }
 
@@ -45,66 +63,11 @@ export class PlayerInfo {
         const player = new PlayerInfo(this.name, this.pid)
         player.explodeCount = this.explodeCount
         player.badNumbers = this.badNumbers
-        player.tiggerCount = this.tiggerCount
+        player.roundCount = this.roundCount
         player.isPlaying = this.isPlaying
         return player
     }
 
-    toJson() {
-        return {
-            pid: this.pid,
-            name: this.name,
-            explodeCount: this.explodeCount,
-            badNumbers: Array.from(this.badNumbers.entries()),
-            gameCount: this.tiggerCount,
-            isPlaying: this.isPlaying
-        }
-    }
-
-    /**
-     * 从JSON数据反序列化
-     * @param json 字符串或已解析的对象
-     * @returns 成功返回PlayerInfo实例，失败返回null
-     */
-    static fromJson(json: string | object): PlayerInfo | null {
-        try {
-            // 如果是字符串则解析为对象
-            const data = typeof json === 'string' ? JSON.parse(json) : json
-
-            // 验证必要字段存在且类型正确
-            if (!data ||
-                typeof data.pid !== 'string' ||
-                typeof data.name !== 'string' ||
-                typeof data.explodeCount !== 'number' ||
-                !Array.isArray(data.badNumbers) ||
-                typeof data.gameCount !== 'number' ||
-                typeof data.isPlaying !== 'boolean') {
-                return null
-            }
-
-            // 创建实例
-            const player = new PlayerInfo(data.name, data.pid)
-            player.explodeCount = data.explodeCount
-            player.tiggerCount = data.gameCount
-            player.isPlaying = data.isPlaying
-
-            // 转换Map类型
-            if (Array.isArray(data.badNumbers)) {
-                for (const entry of data.badNumbers) {
-                    if (Array.isArray(entry) &&
-                        entry.length === 2 &&
-                        typeof entry[0] === 'number' &&
-                        typeof entry[1] === 'number') {
-                        player.badNumbers.set(entry[0], entry[1])
-                    }
-                }
-            }
-
-            return player
-        } catch (error) {
-            return null
-        }
-    }
 }
 
 
@@ -199,56 +162,4 @@ export class GamePlayers {
     }
 
 
-    /**
-     * 序列化为 JSON 可转换对象
-     * @returns 
-     */
-    toJson() {
-        return {
-            players: this.state.players.map(player => player.toJson()),
-            nowPlayerPid: this.state.currentPlayer?.pid || null
-        }
-    }
-
-    /**
-     * 从 JSON 数据反序列化
-     * @param json 字符串或已解析的对象
-     * @returns
-     */
-    static fromJson(json: string | object): GamePlayers {
-        // 创建 GamePlayers 实例
-        const gamePlayers = new GamePlayers()
-        try {
-            // 如果是字符串则解析为对象
-            const data = typeof json === 'string' ? JSON.parse(json) : json
-
-            // 验证必要字段存在且类型正确
-            if (!data ||
-                !Array.isArray(data.players) ||
-                (data.nowPlayerPid !== null && typeof data.nowPlayerPid !== 'string')) {
-                return gamePlayers
-            }
-
-            // 反序列化玩家列表
-            const players: PlayerInfo[] = []
-            for (const playerJson of data.players) {
-                const player = PlayerInfo.fromJson(playerJson)
-                if (player) {
-                    players.push(player)
-                }
-            }
-
-            // 更新玩家列表
-            gamePlayers.changePlayers(players)
-
-            // 设置当前玩家
-            if (data.nowPlayerPid) {
-                gamePlayers.state.currentPlayer = players.find(p => p.pid === data.nowPlayerPid) || null
-            }
-
-            return gamePlayers
-        } catch (error) {
-            return gamePlayers
-        }
-    }
 }

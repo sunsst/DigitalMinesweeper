@@ -9,28 +9,28 @@ export function setTestPlayers(game: GameMain, len: number) {
     let players = names.slice(0, len).map(name => new PlayerInfo(name))
 
     // 正在游戏的玩家
-    let n = Math.min(names.length, Math.floor((randoms.getOne() * 0.3 + 0.2) * len))
+    let n = Math.min(names.length, Math.floor((randoms.getOne() * 0.4 + 0.4) * len))
     for (let i = 0; i < n; i++) {
         players[i].isPlaying = true
     }
 
 
     randoms.disorderedArray(players)
-    n = Math.floor((randoms.getOne() * 0.6 + 0.2) * len)
+    n = Math.floor((randoms.getOne() * 0.6 + 0.4) * len)
+
     for (let i = 0; i < n; i++) {
         const player = players[i]
         // 点击次数200内的随机值
-        player.tiggerCount = Math.floor(200 * randoms.getOne() + 1)
+        player.roundCount = Math.floor(200 * randoms.getOne() + 1)
 
         // 命中次数，控制在点击次数0.8以下
-        n = randoms.getOneInRange(player.tiggerCount * 0.8)
-        let badNumbers = randoms.getMany(n, r => Math.floor(r * game.gameState.total))
+        let badNumbers = randoms.getMany(randoms.getOneInRange(player.roundCount * 0.8), r => Math.floor(r * game.gameState.total))
         for (const r of badNumbers) {
-            player.badNumbers.set(r, (player.badNumbers.get(r) ?? 0) + 1)
+            player.addBadNumber(r)
         }
 
         // 引爆次数，控制在点击次数与棋盘总数的一半以下
-        player.explodeCount = randoms.getMany(player.tiggerCount, r => Math.floor(r * game.gameState.total / 2)).reduce((v, n) => v + n)
+        player.explodeCount = randoms.getMany(player.roundCount, r => Math.floor(r * game.gameState.total / 2)).reduce((v, n) => v + n)
     }
 
     randoms.disorderedArray(players)

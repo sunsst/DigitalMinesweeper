@@ -164,7 +164,7 @@ export class GameMain {
             this.state.gameStatus = 'end'
 
             // 游戏结束后统计
-            for (const p of this.players.players) p.tiggerCount++
+            for (const p of this.players.players) p.roundCount++
             player.addBadNumber(this.badNumber)
         } else {
             this.players.nextPlayer()

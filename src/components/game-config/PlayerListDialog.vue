@@ -5,9 +5,9 @@
             :row-class-name="tableRowClassName">
 
             <el-table-column align="center" type="selection" width="40" />
-            <el-table-column align="center" type="index" width="80" label="序号" />
+            <el-table-column align="center" type="index" width="80" label="#" />
 
-            <el-table-column align="center" prop="pid" label="标识符" width="180" />
+            <el-table-column prop="pid" label="ID" width="180" />
 
             <el-table-column prop="name" label="名称" />
 

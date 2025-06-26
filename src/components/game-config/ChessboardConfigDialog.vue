@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { GameMain } from '../../game/game-main'
-import { ElDialog, ElMessage } from 'element-plus'
+import { ElDialog, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, onUnmounted, reactive } from 'vue'
 
 const model = defineModel({
@@ -138,6 +138,10 @@ function cancelUpdatePlayers() {
 /** 应用临时更改 */
 function updatePlayers() {
     model.value = false
+    if (state.tempTotal != game.gameState.total) {
+        ElMessageBox.alert('修改棋盘大小会导致积分板部分数值失真')
+    }
+
     game.changeGameConfig(state.tempColumn, state.tempTotal, {
         fontSize: state.tempFontSize,
         mineSpriteSize: state.tempSpriteSize,
