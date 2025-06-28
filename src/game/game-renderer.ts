@@ -1,6 +1,7 @@
 import { Application, Assets, Container, Sprite, Text } from "pixi.js"
 import { randoms } from "../util/random-number"
 import type { MineInfo } from "./game-mine"
+import { playAudio } from "./game-audio"
 
 /**
  * 该方法用于加载资源
@@ -24,6 +25,8 @@ async function loadAssets() {
 
     await Assets.init({ manifest })
     await Assets.loadBundle('mines')
+
+
 }
 await loadAssets()
 
@@ -207,6 +210,7 @@ export class GameRenderer {
         if (!sp) return
         this.resetMine(sp)
         sp.texture = Assets.get('badmine')
+        playAudio('showBadNumber')
     }
 
     /**
@@ -245,6 +249,9 @@ export class GameRenderer {
                     texture: Assets.get('boom')
                 })
                 this.effectContainer.addChild(boomsp)
+
+                // 播放音效
+                playAudio('boom')
 
                 // 到时间后移除特效精灵，在最后一个特效精灵消失后返回
                 setTimeout(() => {

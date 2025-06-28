@@ -8,7 +8,7 @@
 import { Histogram } from '@element-plus/icons-vue'
 import { GameMain } from '../../game/game-main'
 import GameScoreboardDialog from '../game-scoreboard/GameScoreboardDialog.vue'
-import { onMounted, reactive } from 'vue'
+import { reactive } from 'vue'
 
 defineProps({
     game: {
@@ -19,10 +19,5 @@ defineProps({
 
 const state = reactive({
     dialog: false
-})
-
-
-onMounted(() => {
-    // state.dialog = true
 })
 </script>

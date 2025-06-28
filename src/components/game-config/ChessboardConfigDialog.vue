@@ -47,6 +47,7 @@
 
         <template #footer>
             <div class="dialog-footer" style="line-height: 40px;">
+                <el-button title="不保存退出" @pointerdown="resetDefaultArgs()">重置参数</el-button>
                 <el-button title="不保存退出" @pointerdown="cancelUpdatePlayers()">取消</el-button>
                 <el-button title="保存并退出" @pointerdown="updatePlayers()">保存</el-button>
             </div>
@@ -127,6 +128,13 @@ function updateState() {
     state.tempFontSize = opt.fontSize
     state.tempSpace = opt.space
     state.tempSpriteSize = opt.mineSpriteSize
+}
+
+function resetDefaultArgs() {
+    model.value = false
+    let total = game.gameState.total
+    game.changeOption()
+    ElMessage({ type: 'success', message: `棋盘参数已重置${total == game.gameState.total ? '' : '，棋盘大小已修改，这将导致计分板部分数值失真'}` })
 }
 
 /** 不应用临时更改 */

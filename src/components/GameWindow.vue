@@ -13,8 +13,8 @@
             <GameRefreshButton :game="game" />
             <GameConfigButton :game="game" />
             <GameScoreboardButton :game="game" />
-            <GameBackStepButton :game="game" />
             <GameSaveButton :game="game" />
+            <GameBackStepButton :game="game" />
         </el-space>
     </div>
 </template>
@@ -45,7 +45,7 @@ const refs = {
     /** 游戏状态 */
     gameStatus: computed(() => gameStatus2String[game.gameState.gameStatus]),
     /** 玩家名称 */
-    playerName: computed(() => game.playerList.currentPlayer?.name || '莫得名字'),
+    playerName: computed(() => game.playerList.currentPlayer?.name || '未设置玩家'),
     /** 玩家名称前缀符号 */
     playerNamePrefix: computed(() => game.gameState.gameStatus == 'end' ? "💥" : "🤯"),
 }
