@@ -1,6 +1,18 @@
 <template>
-    <el-dialog v-model="model" :append-to-body="true" :fullscreen="true">
+    <el-dialog v-model="model" :append-to-body="true" :fullscreen="true" @open="getAllSaves()">
         <div class="dialog">
+            <el-card>
+                <template #header>存档信息</template>
+
+                <div>
+                    <el-radio-group v-model="state.currentSave">
+                        <template v-for="{ str }, i in state.saves">
+                            <el-radio :value="i" size="large">{{ str }}</el-radio>
+                        </template>
+                    </el-radio-group>
+                </div>
+            </el-card>
+
             <el-card shadow="never" style=" min-width: 600px;">
                 <template #header> 总计 </template>
                 <div style="text-align: center;">
@@ -58,6 +70,20 @@
             </el-card>
 
             <el-table :data="vars.players.value" max-height="80vh" :stripe="true" :border="true">
+                <el-table-column type="expand" #default="tableData: { row: PlayerInfo }">
+                    <div style="padding: 2px 10px;">
+                        <el-space :size="20" wrap>
+                            <template
+                                v-for="([badNumber, count], i) in badNumberMap2Array(tableData.row.badNumbers).slice(0, 5)">
+                                <span v-if="i == 0"> Ta的幸运数字：</span>
+                                <el-badge :value="count" badge-style="background-color: #F56C6C">
+                                    <el-tag type="danger"> {{ badNumber + 1 }}</el-tag>
+                                </el-badge>
+                            </template>
+                        </el-space>
+                    </div>
+                </el-table-column>
+
                 <el-table-column align="center" type="index" label="#" width="55" />
 
                 <el-table-column align="center" prop="pid" label="ID" width="180" />
@@ -86,6 +112,11 @@
                     :sort-method="vars.score.sort">
                     {{ vars.score.show(tableData.row) }}
                 </el-table-column>
+
+
+                <template #empty>
+                    <el-empty :image-size="60" description="无有效分数的玩家" />
+                </template>
             </el-table>
         </div>
     </el-dialog>
@@ -95,7 +126,7 @@
 <script setup lang="ts">
 import { GameMain } from '../../game/game-main'
 import { ElDialog } from 'element-plus'
-import { PlayerInfo } from '../../game/game-players'
+import { GamePlayers, PlayerInfo } from '../../game/game-players'
 import { computed, reactive, watch } from 'vue'
 
 const model = defineModel({
@@ -124,6 +155,10 @@ function getExplodeWithRound(p: PlayerInfo) {
     return p.explodeCount / p.roundCount
 }
 
+/**
+ * 获取玩家的倒霉评分
+ * @param player 
+ */
 function getPlayerScore(player: PlayerInfo) {
     if (player.badNumberCount == 0) return 0
 
@@ -137,7 +172,12 @@ function getPlayerScore(player: PlayerInfo) {
 }
 
 const vars = {
-    players: computed(() => game.players.players.filter(p => p.roundCount > 0)),
+    players: computed(() => {
+        let plist
+        if (state.currentSave >= state.saves.length) plist = game.playerList
+        else plist = state.saves[state.currentSave].f()
+        return plist.players.filter(p => p.roundCount > 0)
+    }),
     roundHitRatio: {
         show: (p: PlayerInfo) => (Math.round(getRoundHitRatio(p) * 10000) / 100),
         sort: (a: PlayerInfo, b: PlayerInfo) => getRoundHitRatio(a) - getRoundHitRatio(b)
@@ -159,13 +199,48 @@ const vars = {
 }
 
 
-const state = reactive({
-    total: new PlayerInfo('', ''),
-})
 
+
+/**
+ * 将倒霉数字的字典转换成数组
+ * @param numbers 
+ */
 function badNumberMap2Array(numbers: Map<number, number>) {
     return Array.from(numbers.entries()).sort((a, b) => b[1] - a[1])
 }
+
+
+interface OneSave {
+    str: string,
+    f: (() => GamePlayers)
+}
+
+let emptyPlayerList = new GamePlayers()
+let getNowPlayerList = () => game.playerList
+let getTotalPlayerList = () => game.loadTotalPlayerInfo()
+function getAllSaves() {
+    let saves = game.getOldSaveKeys()
+    state.saves = [{
+        str: '总计',
+        f: getTotalPlayerList
+    }, {
+        str: '当前',
+        f: getNowPlayerList
+    }, ...saves.map(save => {
+        return {
+            str: new Date(save.time).toLocaleDateString(),
+            f: () => GameMain.loadPlayersInfo(save.key) ?? emptyPlayerList
+        }
+    })
+    ]
+}
+
+
+const state = reactive({
+    total: new PlayerInfo('', ''),
+    saves: [] as OneSave[],
+    currentSave: 1,
+})
 
 watch(() => vars.players.value,
     players => {
@@ -178,9 +253,14 @@ watch(() => vars.players.value,
     { immediate: true })
 
 
+
 </script>
 
 <style scoped>
+.dialog {
+    padding-bottom: 10px;
+}
+
 .dialog>* {
     margin: 40px 0;
 }

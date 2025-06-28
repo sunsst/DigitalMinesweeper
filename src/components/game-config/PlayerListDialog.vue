@@ -95,8 +95,8 @@ function switchButtons() {
 
 /** 浅克隆当前的玩家列表 */
 function updateTempPlayerList() {
-    state.tempPlayers = [...game.players.players.map(p => p.shallowClone())]
-    const currenPlayer = game.players.currentPlayer
+    state.tempPlayers = [...game.playerList.players.map(p => p.shallowClone())]
+    const currenPlayer = game.playerList.currentPlayer
     state.tempCurrentPlayer = state.tempPlayers.find(p => p.pid == currenPlayer?.pid) ?? null
     console.log(state.tempPlayers)
 }
@@ -166,7 +166,7 @@ function removePlayer() {
 async function removeAllPlayer() {
     try {
         await ElMessageBox.confirm('你确定要删除所有的玩家？', {
-            confirmButtonText: '提交',
+            confirmButtonText: '确定',
             cancelButtonText: '取消',
         })
         state.tempPlayers = []
@@ -309,10 +309,8 @@ function cancelUpdatePlayers() {
 /** 应用临时更改 */
 function updatePlayers() {
     model.value = false
-    game.players.changePlayers(state.tempPlayers)
-    game.players.changeCurrentPlayer(state.tempCurrentPlayer)
-    console.log(game.players.players)
-    console.log(game.players.currentPlayer)
+    game.playerList.changePlayers(state.tempPlayers)
+    game.playerList.changeCurrentPlayer(state.tempCurrentPlayer)
 
 
     ElMessage({ type: 'success', message: '玩家列表已更新' })

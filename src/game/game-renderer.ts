@@ -24,8 +24,6 @@ async function loadAssets() {
 
     await Assets.init({ manifest })
     await Assets.loadBundle('mines')
-
-    console.log('资源加载完成', manifest)
 }
 await loadAssets()
 
@@ -49,9 +47,11 @@ export const defaultRendererOptions: GameRendererOption = {
 
 export class GameRenderer {
     /** 视口的宽度 */
-    readonly width: number
+    private width_: number = 600
+    get width() { return this.width_ }
     /** 视口的高度 */
-    readonly height: number
+    private height_: number = 800
+    get height() { return this.height_ }
 
     private app: Application
 
@@ -70,11 +70,8 @@ export class GameRenderer {
     /** 该回调函数将在某个地雷精灵被点击后触发，将传入点击地雷的序号 */
     onClickMine: (clickMineNumber: number) => void = () => { }
 
-    /**
-     * @param allMineInfo 要渲染的地雷列表
-     * @param onClickMine 
-     * @param opt 
-     */
+
+    /** 请使用工厂函数初始化 {@link newGameRenderer}  */
     constructor(allMineInfo: MineInfo[], opt: GameRendererOption = defaultRendererOptions) {
         // 初始化
         this.app = new Application()
@@ -83,6 +80,61 @@ export class GameRenderer {
         this.effectContainer = new Container({ x: 0, y: 0, pivot: { x: 0, y: 0 }, zIndex: 10 })
         this.mineNum2spriteMap = new Map()
         this.uid2MineNumMap = new Map()
+
+        // 添加元素
+        this.app.stage.addChild(this.textContainer)
+        this.app.stage.addChild(this.mineContainer)
+        this.app.stage.addChild(this.effectContainer)
+
+        // 监听点击事件
+        this.mineContainer.on('pointerdown', async ev => {
+            let n = this.uid2MineNumMap.get(ev.target.uid)
+            if (n != null)
+                this.onClickMine(n)
+        })
+
+        this.changeOption(allMineInfo, opt)
+    }
+
+    inited_ = false
+
+    /**
+     * 初始化状态
+     */
+    get inited() {
+        return this.inited_
+    }
+
+
+    /**
+     * 游戏渲染器必须异步初始化一次
+     */
+    async init() {
+        await this.app.init({
+            width: this.width_,
+            height: this.height_,
+            background: "#FAFAFA"
+        })
+        this.inited_ = true
+    }
+
+    /** 
+    * 获取渲染画布元素
+    */
+    get canvas() {
+        return this.inited_ ? this.app.canvas : null
+    }
+
+    /**
+     * 在使用前请初始化该方法
+     * @param allMineInfo 要渲染的地雷信息
+     * @param opt 渲染选项
+     */
+    changeOption(allMineInfo: MineInfo[], opt: GameRendererOption = defaultRendererOptions) {
+        this.textContainer.removeChildren()
+        this.mineContainer.removeChildren()
+        this.effectContainer.removeChildren()
+
 
         // 生成并添加地雷元素
         let maxX = 0
@@ -107,37 +159,16 @@ export class GameRenderer {
         }
 
         // 计算长宽
-        this.width = (maxX + 1) * (opt.space + opt.mineSpriteSize) + opt.space
-        this.height = (maxY + 1) * (opt.mineSpriteSize + opt.fontSize + opt.space) + opt.space
+        this.width_ = (maxX + 1) * (opt.space + opt.mineSpriteSize) + opt.space
+        this.height_ = (maxY + 1) * (opt.mineSpriteSize + opt.fontSize + opt.space) + opt.space
 
-        // 添加元素
-        this.app.stage.addChild(this.textContainer)
-        this.app.stage.addChild(this.mineContainer)
-        this.app.stage.addChild(this.effectContainer)
-
-        // 监听点击事件
-        this.mineContainer.on('pointerdown', async ev => {
-            let n = this.uid2MineNumMap.get(ev.target.uid)
-            if (n != null)
-                this.onClickMine(n)
-        })
+        if (this.inited_) {
+            this.app.renderer.resize(this.width_, this.height_)
+        }
     }
 
-    /** 初始化操作完成后再调用其它方法 */
-    async init() {
-        await this.app.init({
-            width: this.width,
-            height: this.height,
-            background: "#FAFAFA"
-        })
-    }
 
-    /** 
-     * 获取渲染画布元素 
-     */
-    get canvas() {
-        return this.app.canvas
-    }
+
 
     /**
      * 重置地雷状态
@@ -152,9 +183,18 @@ export class GameRenderer {
     /**
      * 重置所有地雷状态
      */
-    resetAllMines() {
-        for (const mine of this.mineNum2spriteMap.values())
-            this.resetMine(mine)
+    resetAllMines(mines: MineInfo[]) {
+        for (const mine of mines) {
+            let sp = this.mineNum2spriteMap.get(mine.num)
+            if (sp == null) continue
+
+            if (mine.exploded) {
+                sp.visible = false
+                sp.eventMode = 'none'
+            } else {
+                this.resetMine(sp)
+            }
+        }
     }
 
     /**

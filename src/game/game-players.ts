@@ -68,6 +68,18 @@ export class PlayerInfo {
         return player
     }
 
+
+    /**
+     * 将玩家的分数信息归零
+     */
+    clearScore() {
+        this.explodeCount = 0
+        this.badNumbers.clear()
+        this.roundCount = 0
+        this.badNumberCount = 0
+    }
+
+
 }
 
 
@@ -128,6 +140,7 @@ export class GamePlayers {
         else if (!this.state.currentPlayer.isPlaying) this.state.currentPlayer = this.findNextPlayingPlayer(this.state.currentPlayer)
     }
 
+    /** 切换当前回合的玩家 */
     changeCurrentPlayer(player: PlayerInfo | null) {
         if (player != null) {
             let p = this.state.players.find(p => p.pid == player.pid) ?? null
@@ -137,12 +150,21 @@ export class GamePlayers {
         }
     }
 
+
+
     /**
      * 获取游戏的玩家列表
      * @returns 
      */
     get players() {
         return shallowReadonly(this.state.players)
+    }
+
+    /**
+     * 当修改了玩家信息后调用该方法触发列表更新
+     */
+    refreshPlayers() {
+        this.state.players = [...this.state.players]
     }
 
 
@@ -154,12 +176,84 @@ export class GamePlayers {
     }
 
     /**
-     * 选择下一个正在游戏中的玩家
+     * 设置为下一个正在游戏中的玩家
+     * @returns 
      */
-    nextPlayer() {
+    setNextCurrentPlayer() {
         this.state.currentPlayer = this.findNextPlayingPlayer(this.currentPlayer)
         return this.state.currentPlayer
     }
 
+    /**
+     * 设置为第一个游戏中的玩家
+     * @returns 
+     */
+    setFirstCurrentPlayer() {
+        this.state.currentPlayer = this.findNextPlayingPlayer(null)
+        return this.state.currentPlayer
+    }
 
+    clearScore() {
+        for (const player of this.players) {
+            player.clearScore()
+        }
+        this.refreshPlayers()
+    }
+
+    toObj() {
+        return {
+            players: this.state.players.map(player => ({
+                pid: player.pid,
+                name: player.name,
+                explodeCount: player.explodeCount,
+                badNumbers: Array.from(player.badNumbers.entries()),
+                badNumberCount: player.badNumberCount,
+                roundCount: player.roundCount,
+                isPlaying: player.isPlaying
+            })),
+            currentPlayerPid: this.state.currentPlayer?.pid || null
+        }
+    }
+
+    fromObj(obj: any) {
+        this.state.players = obj.players.map((p: any) => {
+            const player = new PlayerInfo(p.name, p.pid)
+            player.explodeCount = p.explodeCount
+            player.badNumbers = new Map(p.badNumbers)
+            player.badNumberCount = p.badNumberCount
+            player.roundCount = p.roundCount
+            player.isPlaying = p.isPlaying
+            return player
+        })
+
+        this.state.currentPlayer = obj.currentPlayerPid
+            ? this.state.players.find(p => p.pid === obj.currentPlayerPid) || null
+            : null
+    }
+
+
+
+    /**
+     * 合并多个玩家列表
+     * @param gamePlayers 
+     * @returns 
+     */
+    static merge(...gamePlayers: (GamePlayers)[]) {
+        let players: PlayerInfo[] = []
+        let pid2index: Map<string, number> = new Map()
+        for (const gp of gamePlayers) {
+            for (const p of gp.players) {
+                let index = pid2index.get(p.pid)
+                if (index == null) {
+                    index = players.length
+                    pid2index.set(p.pid, index)
+                    players.push(new PlayerInfo(p.name, p.pid))
+                }
+                players[index].addInfo(p)
+            }
+        }
+        let gp = new GamePlayers()
+        gp.changePlayers(players)
+        return gp
+    }
 }

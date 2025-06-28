@@ -1,5 +1,5 @@
 <template>
-    <el-button :icon="Histogram" circle title="重开一局" @pointerdown="state.dialog = !state.dialog" />
+    <el-button :icon="Histogram" circle title="计分板" @pointerdown="state.dialog = !state.dialog" />
     <GameScoreboardDialog v-model="state.dialog" :game="game" />
 </template>
 
@@ -8,7 +8,7 @@
 import { Histogram } from '@element-plus/icons-vue'
 import { GameMain } from '../../game/game-main'
 import GameScoreboardDialog from '../game-scoreboard/GameScoreboardDialog.vue'
-import { reactive } from 'vue'
+import { onMounted, reactive } from 'vue'
 
 defineProps({
     game: {
@@ -21,4 +21,8 @@ const state = reactive({
     dialog: false
 })
 
+
+onMounted(() => {
+    // state.dialog = true
+})
 </script>

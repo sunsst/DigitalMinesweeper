@@ -142,7 +142,7 @@ function updatePlayers() {
         ElMessageBox.alert('修改棋盘大小会导致积分板部分数值失真')
     }
 
-    game.changeGameConfig(state.tempColumn, state.tempTotal, {
+    game.changeOption(state.tempColumn, state.tempTotal, {
         fontSize: state.tempFontSize,
         mineSpriteSize: state.tempSpriteSize,
         space: state.tempSpace

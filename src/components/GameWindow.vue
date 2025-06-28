@@ -13,6 +13,8 @@
             <GameRefreshButton :game="game" />
             <GameConfigButton :game="game" />
             <GameScoreboardButton :game="game" />
+            <GameBackStepButton :game="game" />
+            <GameSaveButton :game="game" />
         </el-space>
     </div>
 </template>
@@ -20,18 +22,14 @@
 <script setup lang="ts">
 import { computed, onMounted, toRef, useTemplateRef } from 'vue'
 import { GameMain, } from '../game/game-main'
-import GameRefreshButton from './game-window-tool/GameRefreshButton.vue'
-import GameConfigButton from './game-window-tool/GameConfigButton.vue'
-import { setTestPlayers } from '../game/test-players'
-import GameScoreboardButton from './game-window-tool/GameScoreboardButton.vue'
+import GameRefreshButton from './game-control-button/GameRefreshButton.vue'
+import GameConfigButton from './game-control-button/GameConfigButton.vue'
+import GameScoreboardButton from './game-control-button/GameScoreboardButton.vue'
+import GameBackStepButton from './game-control-button/GameBackStepButton.vue'
+import GameSaveButton from './game-control-button/GameSaveButton.vue'
 
 const gameBox = useTemplateRef('game-box')
-const game = new GameMain()
-
-
-setTestPlayers(game, 20)
-console.log(game.players.players)
-
+let game: GameMain = new GameMain()
 
 /** 游戏状态映射到字符串 */
 const gameStatus2String = {
@@ -47,7 +45,7 @@ const refs = {
     /** 游戏状态 */
     gameStatus: computed(() => gameStatus2String[game.gameState.gameStatus]),
     /** 玩家名称 */
-    playerName: computed(() => game.players.currentPlayer?.name || '莫得名字'),
+    playerName: computed(() => game.playerList.currentPlayer?.name || '莫得名字'),
     /** 玩家名称前缀符号 */
     playerNamePrefix: computed(() => game.gameState.gameStatus == 'end' ? "💥" : "🤯"),
 }
@@ -55,7 +53,12 @@ const refs = {
 
 onMounted(async () => {
     await game.init()
-    gameBox.value?.appendChild(game.canvas)
+    if (game.canavas)
+        gameBox.value?.appendChild(game.canavas)
+
+
+    // 设置测试玩家
+    // setTestPlayers(game, 20)
 })
 
 </script>

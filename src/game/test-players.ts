@@ -15,25 +15,25 @@ export function setTestPlayers(game: GameMain, len: number) {
     }
 
 
+    // 设置统计信息
+    // randoms.disorderedArray(players)
+    // n = Math.floor((randoms.getOne() * 0.6 + 0.4) * len)
+    // for (let i = 0; i < n; i++) {
+    //     const player = players[i]
+    //     // 点击次数200内的随机值
+    //     player.roundCount = Math.floor(200 * randoms.getOne() + 1)
+
+    //     // 命中次数，控制在点击次数0.8以下
+    //     let badNumbers = randoms.getMany(randoms.getOneInRange(player.roundCount * 0.8), r => Math.floor(r * game.gameState.total))
+    //     for (const r of badNumbers) {
+    //         player.addBadNumber(r)
+    //     }
+
+    //     // 引爆次数，控制在点击次数与棋盘总数的一半以下
+    //     player.explodeCount = randoms.getMany(player.roundCount, r => Math.floor(r * game.gameState.total / 2)).reduce((v, n) => v + n)
+    // }
+
     randoms.disorderedArray(players)
-    n = Math.floor((randoms.getOne() * 0.6 + 0.4) * len)
-
-    for (let i = 0; i < n; i++) {
-        const player = players[i]
-        // 点击次数200内的随机值
-        player.roundCount = Math.floor(200 * randoms.getOne() + 1)
-
-        // 命中次数，控制在点击次数0.8以下
-        let badNumbers = randoms.getMany(randoms.getOneInRange(player.roundCount * 0.8), r => Math.floor(r * game.gameState.total))
-        for (const r of badNumbers) {
-            player.addBadNumber(r)
-        }
-
-        // 引爆次数，控制在点击次数与棋盘总数的一半以下
-        player.explodeCount = randoms.getMany(player.roundCount, r => Math.floor(r * game.gameState.total / 2)).reduce((v, n) => v + n)
-    }
-
-    randoms.disorderedArray(players)
-    game.players.changePlayers(players)
+    game.playerList.changePlayers(players)
 }
 
