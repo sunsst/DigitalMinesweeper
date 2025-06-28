@@ -77,12 +77,12 @@ onMounted(async () => {
     padding-bottom: 10px;
 }
 
-.game-box:deep(canvas) {
+.game-box :deep(canvas) {
     display: block;
 }
 
-.game-window .el-divider:v-deep(.el-divider__text) {
-    background-color: #F5F7FA;
+.game-window .el-divider :deep(.el-divider__text) {
+    background-color: #FAFAFA;
 }
 
 .game-tool {
