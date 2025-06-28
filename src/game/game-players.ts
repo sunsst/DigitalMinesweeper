@@ -102,18 +102,23 @@ export class GamePlayers {
     static findNextPlayingPlayer(players: PlayerInfo[], startPlayer: PlayerInfo | null = null): PlayerInfo | null {
         // 特殊处理
         if (players.length == 0) return null
-        else if (players.length == 1) return players[0]
+        else if (players.length == 1) return players[0].isPlaying ? players[0] : null
 
 
         // 确定起始位置
-        let startI = 0
+        let startI = 0, i = 0
         if (startPlayer instanceof PlayerInfo) {
-            startI = players.findIndex(p => p.pid == startPlayer.pid)
-            if (startI < 0) startI = 0
+            let rI = players.findIndex(p => p.pid == startPlayer.pid)
+            // 当找到时跳过找到的那个
+            if (rI >= 0) {
+                startI = rI
+                i = 1
+            }
         }
 
+
         // 搜索下一个
-        for (let i = 1; i < players.length; i++) {
+        for (; i < players.length; i++) {
             let p = players[(startI + i) % players.length]
             if (p.isPlaying) return p
         }

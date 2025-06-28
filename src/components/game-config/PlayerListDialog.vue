@@ -31,15 +31,17 @@
                 </template>
 
                 <template v-if="state.buttonBarStatus == 1">
-                    <el-button title="添加一个玩家到列表中" @pointerdown="addPlayer()">新增</el-button>
-                    <el-button title="修改选择的第一个玩家的名字" @pointerdown="renamePlayer()">改名</el-button>
-                    <el-button title="移除所有选择的玩家" @pointerdown="removePlayer()">移除</el-button>
-                    <el-button title="移除所有玩家" @pointerdown="removeAllPlayer()">移除所有</el-button>
+                    <el-button title="添加一个玩家到列表中" @pointerdown="addPlayer()">新增玩家</el-button>
+                    <el-button title="修改选择的第一个玩家的名字" @pointerdown="renamePlayer()">玩家改名</el-button>
+                    <el-button title="移除所有选择的玩家" @pointerdown="removePlayer()">移除玩家</el-button>
+                    <el-button title="移除所有玩家" @pointerdown="removeAllPlayer()">移除所有玩家</el-button>
                 </template>
 
                 <template v-if="state.buttonBarStatus == 2">
-                    <el-button title="将第一个参与玩家选作待选玩家" @pointerdown="updateCurrentPlayer()">待选玩家</el-button>
-                    <el-button title="将选择的所有玩家切换参与/未参与状态" @pointerdown="togglePlayingPlayers()">切换参与</el-button>
+                    <el-button title="将第一个参与玩家选作待选玩家" @pointerdown="updateCurrentPlayer()">候选玩家</el-button>
+                    <el-button title="将选择的所有玩家切换参与/未参与状态" @pointerdown="togglePlayingPlayers()">游戏状态切换</el-button>
+                    <el-button title="将选择的所有玩家切换到参与状态" @pointerdown="togglePlayingPlayers(() => true)">参与游戏</el-button>
+                    <el-button title="将选择的所有玩家切换未参与状态" @pointerdown="togglePlayingPlayers(() => false)">退出游戏</el-button>
                 </template>
 
                 <template v-if="state.buttonBarStatus == 3">
@@ -49,10 +51,9 @@
                     <el-button title="移动选择的玩家固定步数" @pointerdown="movePlayer(-1)">上1</el-button>
                     <el-button title="移动选择的玩家固定步数" @pointerdown="movePlayer(5)">下5</el-button>
                     <el-button title="移动选择的玩家固定步数" @pointerdown="movePlayer(-5)">上5</el-button>
-                    <el-button title="移动选择的玩家固定步数" @pointerdown="movePlayer(-5)">上5</el-button>
                     <el-button title="让正在游玩的玩家靠前" @pointerdown="sortPlayerListByStatus()">游玩靠前</el-button>
                 </template>
-                <el-button circle :icon="Switch" @pointerdown="switchButtons()" :title="siwtchButtonTitle" />
+                <el-button circle :icon="Switch" @pointerdown="switchButtons()" :title="switchButtonTitle" />
             </div>
         </template>
     </el-dialog>
@@ -87,7 +88,7 @@ const state = reactive({
 })
 
 const titles = ['默认', '增删改', '状态切换', '按钮状态']
-const siwtchButtonTitle = computed(() => titles[state.buttonBarStatus])
+const switchButtonTitle = computed(() => titles[state.buttonBarStatus])
 function switchButtons() {
     state.buttonBarStatus = (state.buttonBarStatus + 1) % titles.length
 }
@@ -203,17 +204,15 @@ async function addPlayer() {
 }
 
 /** 临时切换游戏玩家的游戏状态 */
-function togglePlayingPlayers() {
+function togglePlayingPlayers(changeFunc: (isPlaying: boolean) => boolean = (b) => !b) {
     const table = tableElement.value
     if (table == null) return
     const selectPlayers = table.getSelectionRows() as PlayerInfo[]
     if (!selectPlayers || selectPlayers.length == 0) return
 
     for (const p of selectPlayers) {
-        p.isPlaying = !p.isPlaying
-        table.toggleRowSelection(p, false)
+        p.isPlaying = changeFunc(p.isPlaying)
     }
-
 
     if (state.tempCurrentPlayer == null || !state.tempCurrentPlayer.isPlaying) {
         state.tempCurrentPlayer = GamePlayers.findNextPlayingPlayer(state.tempPlayers, state.tempCurrentPlayer)

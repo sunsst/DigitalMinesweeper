@@ -306,6 +306,9 @@ export class GameMain {
      * 新开一局游戏
      */
     newGame() {
+        if (this.state.gameStatus == 'end')
+            this.playerList.setNextCurrentPlayer()
+
         this.state.gameStatus = 'init'
 
         for (const m of this.mines) m.exploded = false
@@ -317,7 +320,6 @@ export class GameMain {
         this.updateBadNumber()
 
         this.steps = []
-
     }
 
     private updateBadNumber() {
@@ -482,7 +484,8 @@ export class GameMain {
             state: {
                 column: this.state.column,
                 total: this.state.total,
-                rendererOption: this.state.rendererOption
+                rendererOption: this.state.rendererOption,
+                gameStatus: this.state.gameStatus
             },
             playerList: this.playerList.toObj(),
         }
@@ -493,8 +496,11 @@ export class GameMain {
         this.changeOption(obj.state.column, obj.state.total, obj.state.rendererOption)
 
         // 恢复玩家状态
-        if (loadPlayer)
+        if (loadPlayer) {
             this.playerList.fromObj(obj.playerList)
+            if (obj.state.gameStatus == 'end')
+                this.playerList.setNextCurrentPlayer()
+        }
 
         // 重置渲染器
         this.renderer.resetAllMines(this.mines)
