@@ -28,7 +28,6 @@ async function loadAssets() {
 
 
 }
-await loadAssets()
 
 export interface GameRendererOption {
     /** 地雷精灵的大小 */
@@ -99,7 +98,7 @@ export class GameRenderer {
         this.changeOption(allMineInfo, opt)
     }
 
-    inited_ = false
+    private inited_ = false
 
     /**
      * 初始化状态
@@ -113,6 +112,8 @@ export class GameRenderer {
      * 游戏渲染器必须异步初始化一次
      */
     async init() {
+        if (this.inited_) return
+        await loadAssets()
         await this.app.init({
             width: this.width_,
             height: this.height_,
@@ -187,6 +188,7 @@ export class GameRenderer {
      * 重置所有地雷状态
      */
     resetAllMines(mines: MineInfo[]) {
+        if (!this.inited_) return
         for (const mine of mines) {
             let sp = this.mineNum2spriteMap.get(mine.num)
             if (sp == null) continue

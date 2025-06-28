@@ -125,7 +125,6 @@ export class GameMain {
      * @returns 
      */
     getOldSaveKeys() {
-
         let keys = getAllSaveKyes().filter(save => {
             return save.key != this.state.dateStr
         })
@@ -253,7 +252,10 @@ export class GameMain {
      * 正式使用前请调用该初始化方法
      */
     async init() {
-        await this.renderer.init()
+        if (!this.renderer.inited) {
+            await this.renderer.init()
+            this.renderer.resetAllMines(this.mines)
+        }
     }
 
     /**
