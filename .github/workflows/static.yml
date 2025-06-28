@@ -34,7 +34,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
       - run: npm install
-      - run: npm run buildgitpage
+      - run: npm run build
+    #   - run: npm run buildgitpage
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
