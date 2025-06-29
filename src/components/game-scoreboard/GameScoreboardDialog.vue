@@ -224,7 +224,7 @@ function getAllSaves() {
         str: '总计',
         f: getTotalPlayerList
     }, {
-        str: '当前',
+        str: '今天',
         f: getNowPlayerList
     }, ...saves.map(save => {
         return {
