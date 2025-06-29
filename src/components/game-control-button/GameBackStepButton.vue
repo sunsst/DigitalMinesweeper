@@ -1,6 +1,6 @@
 <template>
     <el-dropdown>
-        <el-button :icon="DArrowLeft" circle title="回退游戏" />
+        <el-button ref="button" :icon="DArrowLeft" circle title="回退游戏" />
         <template #dropdown>
             <el-dropdown-menu>
                 <el-dropdown-item @click="backOne()">回退一步</el-dropdown-item>
@@ -14,7 +14,8 @@
 <script setup lang="ts">
 import { DArrowLeft } from '@element-plus/icons-vue'
 import { GameMain } from '../../game/game-main'
-import { ElMessage } from 'element-plus'
+import { ElButton, ElMessage } from 'element-plus'
+import { ref } from 'vue'
 
 const { game } = defineProps({
     game: { required: true, type: GameMain }
@@ -44,4 +45,8 @@ function backAll() {
     })
 }
 
+const button = ref<InstanceType<typeof ElButton>>()
+defineExpose({
+    button
+})
 </script>

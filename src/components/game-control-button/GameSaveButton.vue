@@ -1,6 +1,6 @@
 <template>
     <el-dropdown>
-        <el-button :icon="DocumentChecked" circle title="保存游戏" />
+        <el-button ref="button" :icon="DocumentChecked" circle title="保存游戏" />
         <template #dropdown>
             <el-dropdown-menu>
                 <el-dropdown-item @click="saveGame()">临时保存</el-dropdown-item>
@@ -14,7 +14,8 @@
 <script setup lang="ts">
 import { DocumentChecked } from '@element-plus/icons-vue'
 import { GameMain } from '../../game/game-main'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
+import { ref } from 'vue'
 
 const { game } = defineProps({
     game: { required: true, type: GameMain }
@@ -58,4 +59,8 @@ async function clearAll() {
 
 }
 
+const button = ref<InstanceType<typeof ElButton>>()
+defineExpose({
+    button
+})
 </script>

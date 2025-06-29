@@ -1,6 +1,6 @@
 <template>
     <el-dropdown>
-        <el-button :icon="Setting" circle title="配置选项" />
+        <el-button ref="button" :icon="Setting" circle title="配置选项" />
         <template #dropdown>
             <el-dropdown-menu>
                 <el-dropdown-item @click="openClosePlayerListDialog()">玩家列表</el-dropdown-item>
@@ -17,9 +17,10 @@
 <script setup lang="ts">
 import { Setting } from '@element-plus/icons-vue'
 import { GameMain } from '../../game/game-main'
-import { shallowReactive } from 'vue'
+import { ref, shallowReactive } from 'vue'
 import PlayerList from '../game-config/PlayerListDialog.vue'
 import ChessboardConfigDialog from '../game-config/ChessboardConfigDialog.vue'
+import type { ElButton } from 'element-plus'
 
 const { game } = defineProps({
     game: { required: true, type: GameMain }
@@ -36,6 +37,11 @@ function openCloseChessboardDialog() {
 const state = shallowReactive({
     playerListDialog: false,
     chessboardDialog: false,
+})
+
+const button = ref<InstanceType<typeof ElButton>>()
+defineExpose({
+    button
 })
 
 </script>
