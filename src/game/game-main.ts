@@ -404,8 +404,14 @@ export class GameMain {
 
         }
         res.after = n - 1
+        this.updateBadNumber()
         this.steps = this.steps.slice(0, n - 1)
         this.renderer.resetAllMines(this.mines)
+        let nums = 0
+        for (let mine of this.mines) {
+            if (!mine.exploded) nums++
+        }
+        this.state.unexplodeCount = nums
 
         return res
     }

@@ -15,6 +15,7 @@
             <GameScoreboardButton :game="game" />
             <GameSaveButton :game="game" />
             <GameBackStepButton :game="game" />
+            <GameHelpInfoButton />
         </el-space>
     </div>
 </template>
@@ -27,6 +28,7 @@ import GameConfigButton from './game-control-button/GameConfigButton.vue'
 import GameScoreboardButton from './game-control-button/GameScoreboardButton.vue'
 import GameBackStepButton from './game-control-button/GameBackStepButton.vue'
 import GameSaveButton from './game-control-button/GameSaveButton.vue'
+import GameHelpInfoButton from './game-control-button/GameInfoButton.vue'
 
 const gameBox = useTemplateRef('game-box')
 let game: GameMain = new GameMain()

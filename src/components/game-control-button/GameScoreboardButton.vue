@@ -1,5 +1,5 @@
 <template>
-    <el-button :icon="Histogram" circle title="计分板" @pointerdown="state.dialog = !state.dialog" />
+    <el-button :icon="Histogram" circle title="计分板" @click="state.dialog = !state.dialog" />
     <GameScoreboardDialog v-model="state.dialog" :game="game" />
 </template>
 

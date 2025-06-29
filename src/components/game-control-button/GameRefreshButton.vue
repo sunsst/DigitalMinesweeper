@@ -1,5 +1,5 @@
 <template>
-    <el-button :icon="Refresh" circle title="重开一局" @pointerdown="newGame()" />
+    <el-button :icon="Refresh" circle title="重开一局" @click="newGame()" />
 </template>
 
 

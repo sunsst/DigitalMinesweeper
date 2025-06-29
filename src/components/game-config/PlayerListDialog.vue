@@ -26,34 +26,34 @@
             <div class="dialog-footer" style="line-height: 40px;">
 
                 <template v-if="state.buttonBarStatus == 0">
-                    <el-button title="不保存退出" @pointerdown="cancelUpdatePlayers()">取消</el-button>
-                    <el-button title="保存并退出" @pointerdown="updatePlayers()">保存</el-button>
+                    <el-button title="不保存退出" @click="cancelUpdatePlayers()">取消</el-button>
+                    <el-button title="保存并退出" @click="updatePlayers()">保存</el-button>
                 </template>
 
                 <template v-if="state.buttonBarStatus == 1">
-                    <el-button title="添加一个玩家到列表中" @pointerdown="addPlayer()">新增玩家</el-button>
-                    <el-button title="修改选择的第一个玩家的名字" @pointerdown="renamePlayer()">玩家改名</el-button>
-                    <el-button title="移除所有选择的玩家" @pointerdown="removePlayer()">移除玩家</el-button>
-                    <el-button title="移除所有玩家" @pointerdown="removeAllPlayer()">移除所有玩家</el-button>
+                    <el-button title="添加一个玩家到列表中" @click="addPlayer()">新增玩家</el-button>
+                    <el-button title="修改选择的第一个玩家的名字" @click="renamePlayer()">玩家改名</el-button>
+                    <el-button title="移除所有选择的玩家" @click="removePlayer()">移除玩家</el-button>
+                    <el-button title="移除所有玩家" @click="removeAllPlayer()">移除所有玩家</el-button>
                 </template>
 
                 <template v-if="state.buttonBarStatus == 2">
-                    <el-button title="将第一个参与玩家选作待选玩家" @pointerdown="updateCurrentPlayer()">候选玩家</el-button>
-                    <el-button title="将选择的所有玩家切换参与/未参与状态" @pointerdown="togglePlayingPlayers()">游戏状态切换</el-button>
-                    <el-button title="将选择的所有玩家切换到参与状态" @pointerdown="togglePlayingPlayers(() => true)">参与游戏</el-button>
-                    <el-button title="将选择的所有玩家切换未参与状态" @pointerdown="togglePlayingPlayers(() => false)">退出游戏</el-button>
+                    <el-button title="将第一个参与玩家选作待选玩家" @click="updateCurrentPlayer()">候选玩家</el-button>
+                    <el-button title="将选择的所有玩家切换参与/未参与状态" @click="togglePlayingPlayers()">游戏状态切换</el-button>
+                    <el-button title="将选择的所有玩家切换到参与状态" @click="togglePlayingPlayers(() => true)">参与游戏</el-button>
+                    <el-button title="将选择的所有玩家切换未参与状态" @click="togglePlayingPlayers(() => false)">退出游戏</el-button>
                 </template>
 
                 <template v-if="state.buttonBarStatus == 3">
                     <el-input-number v-model="state.moveNumber" style="margin-right: 20px;" :step="100" />
-                    <el-button title="移动选择的玩家指定步数" @pointerdown="movePlayer(state.moveNumber)">移动玩家</el-button>
-                    <el-button title="移动选择的玩家固定步数" @pointerdown="movePlayer(1)">下1</el-button>
-                    <el-button title="移动选择的玩家固定步数" @pointerdown="movePlayer(-1)">上1</el-button>
-                    <el-button title="移动选择的玩家固定步数" @pointerdown="movePlayer(5)">下5</el-button>
-                    <el-button title="移动选择的玩家固定步数" @pointerdown="movePlayer(-5)">上5</el-button>
-                    <el-button title="让正在游玩的玩家靠前" @pointerdown="sortPlayerListByStatus()">游玩靠前</el-button>
+                    <el-button title="移动选择的玩家指定步数" @click="movePlayer(state.moveNumber)">移动玩家</el-button>
+                    <el-button title="移动选择的玩家固定步数" @click="movePlayer(1)">下1</el-button>
+                    <el-button title="移动选择的玩家固定步数" @click="movePlayer(-1)">上1</el-button>
+                    <el-button title="移动选择的玩家固定步数" @click="movePlayer(5)">下5</el-button>
+                    <el-button title="移动选择的玩家固定步数" @click="movePlayer(-5)">上5</el-button>
+                    <el-button title="让正在游玩的玩家靠前" @click="sortPlayerListByStatus()">游玩靠前</el-button>
                 </template>
-                <el-button circle :icon="Switch" @pointerdown="switchButtons()" :title="switchButtonTitle" />
+                <el-button circle :icon="Switch" @click="switchButtons()" :title="switchButtonTitle" />
             </div>
         </template>
     </el-dialog>

@@ -3,8 +3,8 @@
         <el-button :icon="DArrowLeft" circle title="回退游戏" />
         <template #dropdown>
             <el-dropdown-menu>
-                <el-dropdown-item><el-button text @pointerdown="backOne()">回退一步</el-button></el-dropdown-item>
-                <el-dropdown-item><el-button text @pointerdown="backAll()">本局初始</el-button></el-dropdown-item>
+                <el-dropdown-item @click="backOne()">回退一步</el-dropdown-item>
+                <el-dropdown-item @click="backAll()">本局初始</el-dropdown-item>
             </el-dropdown-menu>
         </template>
     </el-dropdown>

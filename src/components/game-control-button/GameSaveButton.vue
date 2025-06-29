@@ -3,8 +3,8 @@
         <el-button :icon="DocumentChecked" circle title="保存游戏" />
         <template #dropdown>
             <el-dropdown-menu>
-                <el-dropdown-item><el-button text @pointerdown="saveGame()">临时保存</el-button></el-dropdown-item>
-                <el-dropdown-item><el-button text @pointerdown="clearAll()">计分重置</el-button></el-dropdown-item>
+                <el-dropdown-item @click="saveGame()">临时保存</el-dropdown-item>
+                <el-dropdown-item @click="clearAll()">计分重置</el-dropdown-item>
             </el-dropdown-menu>
         </template>
     </el-dropdown>

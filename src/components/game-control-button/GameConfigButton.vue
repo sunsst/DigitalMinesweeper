@@ -3,17 +3,15 @@
         <el-button :icon="Setting" circle title="配置选项" />
         <template #dropdown>
             <el-dropdown-menu>
-                <el-dropdown-item><el-button text
-                        @pointerdown="configState.playerListDialog = !configState.playerListDialog">玩家列表</el-button></el-dropdown-item>
-                <el-dropdown-item><el-button text
-                        @pointerdown="configState.chessboardDialog = !configState.chessboardDialog">棋盘参数</el-button></el-dropdown-item>
+                <el-dropdown-item @click="openClosePlayerListDialog()">玩家列表</el-dropdown-item>
+                <el-dropdown-item @click="openCloseChessboardDialog()">棋盘参数</el-dropdown-item>
             </el-dropdown-menu>
         </template>
     </el-dropdown>
 
 
-    <PlayerList v-model="configState.playerListDialog" :game="game" />
-    <ChessboardConfigDialog v-model="configState.chessboardDialog" :game="game" />
+    <PlayerList v-model="state.playerListDialog" :game="game" />
+    <ChessboardConfigDialog v-model="state.chessboardDialog" :game="game" />
 </template>
 
 <script setup lang="ts">
@@ -27,7 +25,15 @@ const { game } = defineProps({
     game: { required: true, type: GameMain }
 })
 
-const configState = shallowReactive({
+function openClosePlayerListDialog() {
+    state.playerListDialog = !state.playerListDialog
+}
+
+function openCloseChessboardDialog() {
+    state.chessboardDialog = !state.chessboardDialog
+}
+
+const state = shallowReactive({
     playerListDialog: false,
     chessboardDialog: false,
 })
